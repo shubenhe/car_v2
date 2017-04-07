@@ -1,19 +1,19 @@
 !*.c   
 !*.h  
-   *.log  
-   *.plg  
-   *.bak  
-   *.bat
-   *.dep  
-   *.uvgui.*  
-   JLinkLog.txt  
-   *.o  
-   *.d  
-   *.crf  
-   *.tra  
-   *.axf  
-   *.hex  
-   *.lnp  
-   *.sct  
-   *.__i  
-   *.htm 
+*.log  
+*.plg  
+*.bak  
+*.bat
+*.dep  
+*.uvgui.*  
+JLinkLog.txt  
+*.o  
+*.d  
+*.crf  
+*.tra  
+*.axf  
+*.hex  
+*.lnp  
+*.sct  
+*.__i  
+*.htm 
