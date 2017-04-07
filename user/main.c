@@ -10,6 +10,7 @@
 #include "lcd.h"   
 #include "24l01.h"   
 #include "led.h"   
+#include "main.h"
 
 #define speed_min 2000
 #define speed_max 12000
@@ -28,7 +29,7 @@ extern	u8 hopping_turn;
 	u16 t=0;			 
 	u8 tmp_buf[33]; 
 	 
-	 delay_init();
+//	 delay_init();
 	 NVIC_Configuration();
 	 uart_init(9600);
 	 pwm_init();
@@ -50,6 +51,7 @@ extern	u8 hopping_turn;
 	 {  		    		    				 
 			if(NRF24L01_RxPacket(tmp_buf)==0)//一旦接收到信息
 			{
+				LED0=1; //红灯灭
 				
 				pwm_l = pwm_r = tmp_buf[2]*60000u/250;
 
@@ -116,6 +118,10 @@ extern	u8 hopping_turn;
 				TIM_SetCompare2(TIM8,pwm_l);
 				TIM_SetCompare3(TIM8,pwm_r);
 			}
+			else
+			{//未收到信号，红灯亮
+				LED0=0;
+			}
 			
 			if(t==50000)
 			{
@@ -123,11 +129,6 @@ extern	u8 hopping_turn;
 				LED1=!LED1;
 			} 
 			t++;
-			
-			if(tmp_buf[3]>=100)
-				LED0=0;
-			else
-				LED0=1; 
 	 
 	 }
  }
