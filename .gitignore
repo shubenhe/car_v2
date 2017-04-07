@@ -1,4 +1,5 @@
 #前面不能有空格
+#不要使用“git config --global core.autocrlf false”，来屏蔽“warning: LF will be replaced by CRLF”
 
 #保留的文件
 !*.c
