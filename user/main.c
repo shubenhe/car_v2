@@ -11,6 +11,7 @@
 #include "24l01.h"   
 #include "led.h"   
 #include "main.h"
+#include "ycjobject.h"
 
 #define speed_min 2000
 #define speed_max 12000
