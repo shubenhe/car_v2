@@ -9,7 +9,6 @@
 *.log
 *.plg
 *.bak
-*.bat
 *.dep
 *.uvgui.*
 JLinkLog.txt
