@@ -7,7 +7,6 @@
 #include "key.h"
 #include "direction.h"
 #include "speed.h"
-#include "lcd.h"   
 #include "24l01.h"   
 #include "led.h"   
 #include "main.h"
