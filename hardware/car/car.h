@@ -12,6 +12,8 @@ extern u8 CH[RX_PLOAD_WIDTH];
 #define ID_LightGreen 	1
 #define ID_LightRed			2
 #define ID_Wireless_Com	3
+#define ID_Wheel_Left		4
+#define ID_Wheel_Right	5
 
 //定义灯状态
 #define Status_Light_OFF	0
@@ -20,9 +22,11 @@ extern u8 CH[RX_PLOAD_WIDTH];
 //类声明
 struct TLight;
 struct TWireless_Com;
+struct TWheel;
 
 // 定义函数指针
 typedef void (*tvf_light)(pobject(TLight,obj));
+typedef void (*tvf_wheel)(pobject(TWheel,obj));
 typedef u8 (*tu8f_wireless_com)(pobject(TWireless_Com,obj));
 typedef void (*tvfv)(void);
 typedef u8 (*tu8fv)(void);
@@ -44,6 +48,11 @@ struct TWheel
 {
 	Const
 		tu8fv ID;
+	Variable
+		u8 Direction;
+		u8 Speed;
+	Method
+	 tvf_wheel Run;
 };
 
 // 无线通信类
@@ -73,5 +82,8 @@ void light_Create(pobject(TLight,obj));
 u8 light_green_ID(void);
 u8 light_red_ID(void);
 void wireless_com_Create(pobject(TWireless_Com,obj));
+void wheel_Create(pobject(TWheel,obj));
+u8 wheel_left_ID(void);
+u8 wheel_right_ID(void);
 
 #endif

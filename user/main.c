@@ -34,6 +34,10 @@ extern	u8 hopping_turn;
 	 object(TLight,Light_Red);
 	 //无线通信
 	 object(TWireless_Com,Wireless_Com);
+	 //左车轮
+	 object(TWheel,Wheel_Left);
+	 //右车轮
+	 object(TWheel,Wheel_Right);
 	 
 	 //创建对象——绿灯
 	 create(light_Create,&Light_Green);
@@ -43,6 +47,12 @@ extern	u8 hopping_turn;
 	 Light_Red.ID = light_red_ID;
 	 //无线通信
 	 create(wireless_com_Create,&Wireless_Com);
+	 //左车轮
+	 create(wheel_Create,&Wheel_Left);
+	 Wheel_Left.ID = wheel_left_ID;
+	 //右车轮
+	 create(wheel_Create,&Wheel_Right);
+	 Wheel_Right.ID = wheel_right_ID;
 	 
 	 delay_init();
 	 NVIC_Configuration();

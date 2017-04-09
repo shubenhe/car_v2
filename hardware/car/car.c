@@ -112,3 +112,44 @@ void wireless_com_Create(pobject(TWireless_Com,obj))
 	obj->INIT = wireless_com_INIT;
 	obj->Get_Message = get_message;
 }
+
+// 功能：返回左车轮标识
+// 参数：obj，TLight类型，对类成员本身的引用
+// 返回：左车轮标识
+// 备注：
+u8 wheel_left_ID(void)
+{
+	return ID_Wheel_Left;
+}
+
+// 功能：返回右车轮标识
+// 参数：obj，TLight类型，对类成员本身的引用
+// 返回：右车轮标识
+// 备注：
+u8 wheel_right_ID(void)
+{
+	return ID_Wheel_Right;
+}
+
+// 功能：车轮运行
+// 参数：obj，TLight类型，对类成员本身的引用
+// 返回：无
+// 备注：
+void wheel_Run(pobject(TWheel,obj))
+{
+}
+
+// 功能：车轮类创建
+// 参数：obj，TLight类型，对类成员本身的引用
+// 返回：无
+// 备注：
+void wheel_Create(pobject(TWheel,obj))
+{
+	//常量初始化
+	
+	//变量初始化
+	obj->Direction = 0;
+	obj->Speed = 0;
+	//行为初始化
+	obj->Run = wheel_Run;
+}
