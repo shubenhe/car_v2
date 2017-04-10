@@ -199,7 +199,7 @@ void wheel_Run(pobject(TWheel,obj))
 			PBout(0) = 1;
 		}
 	}
-	else if(obj->ID() == ID_Wheel_Left)
+	else if(obj->ID() == ID_Wheel_Right)
 	{		//ÓÒÂÖ
 		TIM_SetCompare3(TIM8,(obj->Speed)*600u);
 		
@@ -251,7 +251,7 @@ void com_to_wheel(pobject(TWireless_Com,obj_Wl),pobject(TWheel,obj_L),pobject(TW
 	u16 s_l_temp = 0;
 	u16 s_r_temp = 0;
 	
-	s_l_temp = s_r_temp = obj_Wl->Channel[2]*60000u/250;
+	s_l_temp = s_r_temp = obj_Wl->Channel[2]*100u/250;
 
 	if(obj_Wl->Channel[0]>135)
 	{//ÍùÇ°
@@ -312,6 +312,9 @@ void com_to_wheel(pobject(TWireless_Com,obj_Wl),pobject(TWheel,obj_L),pobject(TW
 		else
 		{//Í£
 			obj_L->Direction =  obj_R->Direction = Direction_Stop;
+			s_l_temp = s_r_temp = 0;
 		}
 	}
+	obj_L->Speed = s_l_temp;
+	obj_R->Speed = s_r_temp;
 }
