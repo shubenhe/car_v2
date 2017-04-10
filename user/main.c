@@ -75,18 +75,18 @@ int main(void)
 	 
 	while(1)
 	{
-		if(Wireless_Com.Get_Message(&Wireless_Com) ==0)	//一旦接收到信息
-		{
+		if(Wireless_Com.Get_Message(&Wireless_Com) ==0)
+		{	//一旦接收到信息
 			Light_Red.ON(&Light_Red);	//红灯亮
 			com_to_wheel(&Wireless_Com,&Wheel_Left,&Wheel_Right);	//分析指令转换为命令
 			Wheel_Left.Run(&Wheel_Left);	//执行命令
 			Wheel_Right.Run(&Wheel_Right);	//执行命令
 		}
 		else
-		{	//未收到信号，红灯灭
-			Light_Red.OFF(&Light_Red);
+		{	//未收到信号
+			Light_Red.OFF(&Light_Red);	//红灯灭
 		}
-			
+		
 		if(t==50000)
 		{
 			t=0;
@@ -94,9 +94,8 @@ int main(void)
 				Light_Green.ON(&Light_Green);
 			else
 				Light_Green.OFF(&Light_Green);
-		} 
+		}
 		t++;
-	 
 	 }
 }
 
