@@ -41,6 +41,6 @@ void pwm_init(void)					//用TIM8产生PWM波形
 	
 	TIM_ARRPreloadConfig(TIM8, ENABLE); //使能TIMx在ARR上的预装载寄存器
 	
-	TIM_SetCompare2(TIM8,pwm_l);
-	TIM_SetCompare3(TIM8,pwm_r);
+	TIM_SetCompare2(TIM8,5000);
+	TIM_SetCompare3(TIM8,5000);
 }

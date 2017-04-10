@@ -5,6 +5,8 @@
 #include "ycjobject.h"
 #include "led.h"
 #include "24l01.h"
+#include "pwm.h"
+#include "direction.h"
 
 extern u8 CH[RX_PLOAD_WIDTH];
 
@@ -18,6 +20,11 @@ extern u8 CH[RX_PLOAD_WIDTH];
 //定义灯状态
 #define Status_Light_OFF	0
 #define Status_Light_ON		1
+
+//定义车轮方向
+#define Direction_Stop			0
+#define Direction_Forward		1
+#define Direction_Backward	2
 
 //类声明
 struct TLight;
@@ -39,6 +46,7 @@ struct TLight
 	Variable
 		_Bool Status;
 	Method
+		tvfv INIT;
 		tvf_light ON;
 		tvf_light OFF;
 };
@@ -50,9 +58,10 @@ struct TWheel
 		tu8fv ID;
 	Variable
 		u8 Direction;
-		u8 Speed;
+		u8 Speed;			//速度分为100档
 	Method
-	 tvf_wheel Run;
+		tvf_wheel Run;
+		tvfv INIT;
 };
 
 // 无线通信类
@@ -85,5 +94,8 @@ void wireless_com_Create(pobject(TWireless_Com,obj));
 void wheel_Create(pobject(TWheel,obj));
 u8 wheel_left_ID(void);
 u8 wheel_right_ID(void);
+void light_green_INIT(void);
+void light_red_INIT(void);
+void com_to_wheel(pobject(TWireless_Com,obj_Wl),pobject(TWheel,obj_l),pobject(TWheel,obj_r));
 
 #endif

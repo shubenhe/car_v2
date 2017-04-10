@@ -3,7 +3,6 @@
 
 #include "sys.h"
 
-
 extern u16 pwm_l,pwm_r;
 
 void pwm_init(void);
