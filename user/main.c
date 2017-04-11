@@ -26,7 +26,6 @@ extern	u8 hopping_turn;
 
 int main(void)
 {
-	u32 t=0;
 	
 	//申请对象空间——绿灯
 	object(TLight,Light_Green);
@@ -38,6 +37,8 @@ int main(void)
 	object(TWheel,Wheel_Left);
 	//右车轮
 	object(TWheel,Wheel_Right);
+	//定时器1
+	object(TTimer,TIMER1);
 	
 	//创建对象——绿灯
 	create(light_Create,&Light_Green);
@@ -55,10 +56,14 @@ int main(void)
 	//右车轮
 	create(wheel_Create,&Wheel_Right);
 	Wheel_Right.ID = wheel_right_ID;
+	//定时器1
+	create(timer_Create,&TIMER1);
+	TIMER1.BaseFlag = &T_1ms_flag;
 	
 	//初始化
 	delay_init();
 	NVIC_Configuration();
+	timer_init();
 //	uart_init(9600);
 	Wheel_Left.INIT();
 	Light_Red.INIT();	//初始化与LED连接的硬件接口
@@ -69,12 +74,17 @@ int main(void)
 	{
 		while(1);
 	}
+	
 	delay_ms(1000);
+	
+//	while(!(TIMER1.DELAY(&TIMER1,3000)));
 	
 	NRF24L01_RX_Mode();		
 	 
 	while(1)
 	{
+		timer_flag_refresh();	//时间标记更新
+		
 		if(Wireless_Com.Get_Message(&Wireless_Com) ==0)
 		{	//一旦接收到信息
 			Light_Red.ON(&Light_Red);	//红灯亮
@@ -87,15 +97,15 @@ int main(void)
 			Light_Red.OFF(&Light_Red);	//红灯灭
 		}
 		
-		if(t==50000)
+		if(TIMER1.DELAY(&TIMER1,500))
 		{
-			t=0;
 			if(Status_Light_OFF == Light_Green.Status)
 				Light_Green.ON(&Light_Green);
 			else
 				Light_Green.OFF(&Light_Green);
 		}
-		t++;
+		
+		timer_flag_reset();	//时间标记复位
 	 }
 }
 

@@ -146,7 +146,7 @@ void wireless_com_Create(pobject(TWireless_Com,obj))
 }
 
 // 功能：返回左车轮标识
-// 参数：obj，TLight类型，对类成员本身的引用
+// 参数：无
 // 返回：左车轮标识
 // 备注：
 u8 wheel_left_ID(void)
@@ -155,7 +155,7 @@ u8 wheel_left_ID(void)
 }
 
 // 功能：返回右车轮标识
-// 参数：obj，TLight类型，对类成员本身的引用
+// 参数：无
 // 返回：右车轮标识
 // 备注：
 u8 wheel_right_ID(void)
@@ -319,13 +319,140 @@ void com_to_wheel(pobject(TWireless_Com,obj_Wl),pobject(TWheel,obj_L),pobject(TW
 	obj_R->Speed = s_r_temp;
 }
 
+// 功能：返回计时器标识
+// 参数：无
+// 返回：左车轮标识
+// 备注：
+u8 timer_ID(void)
+{
+	return ID_Timer;
+}
+
 // 功能：计时器延时函数
 // 参数：	obj，TTimer类型，对类成员本身的引用
 //			set_value，u32类型，设置值
 // 返回：	0，延时未到
 //			1，延时到
 // 备注：
-u8 timer_counter(pobject(TTimer,obj),u32 set_value)
+u8 timer_delay(pobject(TTimer,obj),u32 set_value)
 {
+	if(set_value)
+	{	//需延时
+		if(0 == obj->Set)
+		{	// 未设置延时时间
+			obj->Set = set_value;
+			obj->Counter = 0;
+		}
+	
+		if(*obj->BaseFlag)
+		{// 延时时基到
+			if(obj->Counter <= obj->Set)
+			{// 延时未到
+				obj->Counter++;
+			}
+			else
+			{// 延时到
+				obj->Set = obj->Counter = 0;	//	计时器复位
+				
+				return 1;
+			}
+		}
+	}
+	else
+	{	//	不需延时
+		return 1;
+	}
+	
 	return 0;
+}
+
+// 功能：计时器类创建
+// 参数：obj，TTimer类型，对类成员本身的引用
+// 返回：无
+// 备注：
+void timer_Create(pobject(TTimer,obj))
+{
+	//常量初始化
+	obj->ID = timer_ID;
+	//变量初始化
+	obj->Counter = 0;
+	obj->Set = 0;
+	//行为初始化
+	obj->DELAY = timer_delay;
+}
+
+_Bool T_1ms_flag;
+_Bool T_1ms_flag_M;
+
+// 功能：计时器标识置位
+// 参数：无
+// 返回：无
+// 备注：
+void timer_flag_set(void)
+{
+	T_1ms_flag_M = 1;
+}
+
+// 功能：计时器标识刷新
+// 参数：无
+// 返回：无
+// 备注：
+void timer_flag_refresh(void)
+{
+	T_1ms_flag = T_1ms_flag_M;
+	T_1ms_flag_M = 0;
+}
+
+// 功能：计时器标识复位
+// 参数：无
+// 返回：无
+// 备注：
+void timer_flag_reset(void)
+{
+	T_1ms_flag = 0;
+}
+
+// 功能：定时器初始化
+// 参数：
+// 返回：无
+// 备注：
+void timer_init(void)
+{
+  TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE); //时钟使能
+
+	TIM_TimeBaseStructure.TIM_Period = 9; //设置在下一个更新事件装入活动的自动重装载寄存器周期的值	 计数到10为1ms
+	TIM_TimeBaseStructure.TIM_Prescaler =7199; //设置用来作为TIMx时钟频率除数的预分频值  10Khz的计数频率  
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0; //设置时钟分割:TDTS = Tck_tim
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  //TIM向上计数模式
+	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure); //根据TIM_TimeBaseInitStruct中指定的参数初始化TIMx的时间基数单位
+ 
+	TIM_ITConfig(  //使能或者失能指定的TIM中断
+		TIM4, //TIM4
+		TIM_IT_Update ,
+		ENABLE  //使能
+		);
+	NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;  //TIM4中断
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;  //先占优先级0级
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;  //从优先级3级
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQ通道被使能
+	NVIC_Init(&NVIC_InitStructure);  //根据NVIC_InitStruct中指定的参数初始化外设NVIC寄存器
+
+	TIM_Cmd(TIM4, ENABLE);  //使能TIMx外设
+}
+
+// 功能：定时器中断
+// 参数：
+// 返回：无
+// 备注：
+void TIM4_IRQHandler(void)   //TIM4中断
+{
+	if(TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET) //检查指定的TIM中断发生与否:TIM 中断源 
+		{
+			timer_flag_set();
+			
+			TIM_ClearITPendingBit(TIM4, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
+		}
 }
