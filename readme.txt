@@ -18,3 +18,25 @@ PID调节记录
 
 2015.6.13完成PID调节
 
+170411 bug
+/***************有问题，无线反应变慢************/
+	//初始化
+	delay_init();
+	NVIC_Configuration();//***************************
+	timer_init();//***************************
+//	uart_init(9600);
+	Wheel_Left.INIT();
+	Light_Red.INIT();	//初始化与LED连接的硬件接口
+	Light_Green.INIT();
+	Wireless_Com.INIT();	//初始化NRF24L01
+
+/**************无线变慢问题能解决**************/
+	//初始化
+	delay_init();
+	NVIC_Configuration();//***************************
+//	uart_init(9600);
+	Wheel_Left.INIT();
+	Light_Red.INIT();	//初始化与LED连接的硬件接口
+	Light_Green.INIT();
+	Wireless_Com.INIT();	//初始化NRF24L01
+	timer_init();//***************************

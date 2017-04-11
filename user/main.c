@@ -63,12 +63,12 @@ int main(void)
 	//初始化
 	delay_init();
 	NVIC_Configuration();
-	timer_init();
 //	uart_init(9600);
 	Wheel_Left.INIT();
 	Light_Red.INIT();	//初始化与LED连接的硬件接口
 	Light_Green.INIT();
 	Wireless_Com.INIT();	//初始化NRF24L01
+	timer_init();
 	 
 	while(NRF24L01_Check())	//检查NRF24L01是否在位.	
 	{
@@ -94,7 +94,7 @@ int main(void)
 			Light_Red.OFF(&Light_Red);	//红灯灭
 		}
 		
-		if(TIMER1.DELAY(&TIMER1,500))
+		if(TIMER1.DELAY(&TIMER1,100))
 		{
 			if(Status_Light_OFF == Light_Green.Status)
 				Light_Green.ON(&Light_Green);
