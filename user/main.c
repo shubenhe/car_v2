@@ -58,7 +58,7 @@ int main(void)
 	Wheel_Right.ID = wheel_right_ID;
 	//定时器1
 	create(timer_Create,&TIMER1);
-	TIMER1.BaseFlag = &T_1ms_flag;
+	TIMER1.BaseFlag = &TIMER1_1ms_flag;
 	
 	//初始化
 	delay_init();
@@ -75,15 +75,12 @@ int main(void)
 		while(1);
 	}
 	
-	delay_ms(1000);
-	
-//	while(!(TIMER1.DELAY(&TIMER1,3000)));
+	while(!(TIMER1.DELAY(&TIMER1,1000)));
 	
 	NRF24L01_RX_Mode();		
 	 
 	while(1)
 	{
-		timer_flag_refresh();	//时间标记更新
 		
 		if(Wireless_Com.Get_Message(&Wireless_Com) ==0)
 		{	//一旦接收到信息
@@ -105,7 +102,6 @@ int main(void)
 				Light_Green.OFF(&Light_Green);
 		}
 		
-		timer_flag_reset();	//时间标记复位
 	 }
 }
 

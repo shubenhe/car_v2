@@ -336,6 +336,10 @@ u8 timer_ID(void)
 // 备注：
 u8 timer_delay(pobject(TTimer,obj),u32 set_value)
 {
+	_Bool base_flag = *obj->BaseFlag;//更新时基标记
+	
+	*obj->BaseFlag = 0;//复位时基标识
+	
 	if(set_value)
 	{	//需延时
 		if(0 == obj->Set)
@@ -344,7 +348,7 @@ u8 timer_delay(pobject(TTimer,obj),u32 set_value)
 			obj->Counter = 0;
 		}
 	
-		if(*obj->BaseFlag)
+		if(base_flag)
 		{// 延时时基到
 			if(obj->Counter <= obj->Set)
 			{// 延时未到
@@ -381,8 +385,7 @@ void timer_Create(pobject(TTimer,obj))
 	obj->DELAY = timer_delay;
 }
 
-_Bool T_1ms_flag;
-_Bool T_1ms_flag_M;
+_Bool TIMER1_1ms_flag;	// 时基标识
 
 // 功能：计时器标识置位
 // 参数：无
@@ -390,26 +393,7 @@ _Bool T_1ms_flag_M;
 // 备注：
 void timer_flag_set(void)
 {
-	T_1ms_flag_M = 1;
-}
-
-// 功能：计时器标识刷新
-// 参数：无
-// 返回：无
-// 备注：
-void timer_flag_refresh(void)
-{
-	T_1ms_flag = T_1ms_flag_M;
-	T_1ms_flag_M = 0;
-}
-
-// 功能：计时器标识复位
-// 参数：无
-// 返回：无
-// 备注：
-void timer_flag_reset(void)
-{
-	T_1ms_flag = 0;
+	TIMER1_1ms_flag = 1;
 }
 
 // 功能：定时器初始化
@@ -435,7 +419,7 @@ void timer_init(void)
 		ENABLE  //使能
 		);
 	NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;  //TIM4中断
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;  //先占优先级0级
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;  //先占优先级0级
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;  //从优先级3级
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQ通道被使能
 	NVIC_Init(&NVIC_InitStructure);  //根据NVIC_InitStruct中指定的参数初始化外设NVIC寄存器

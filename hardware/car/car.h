@@ -8,7 +8,7 @@
 #include "pwm.h"
 #include "direction.h"
 
-extern _Bool T_1ms_flag;
+extern _Bool TIMER1_1ms_flag;
 
 //定义身份ID
 #define ID_LightGreen 		1
@@ -114,9 +114,6 @@ void light_green_INIT(void);
 void light_red_INIT(void);
 void com_to_wheel(pobject(TWireless_Com,obj_Wl),pobject(TWheel,obj_l),pobject(TWheel,obj_r));
 void timer_init(void);
-void timer_flag_set(void);
-void timer_flag_reset(void);
-void timer_flag_refresh(void);
 void timer_Create(pobject(TTimer,obj));
 
 #endif
