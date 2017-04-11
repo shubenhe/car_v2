@@ -11,11 +11,11 @@
 extern u8 CH[RX_PLOAD_WIDTH];
 
 //定义身份ID
-#define ID_LightGreen 	1
+#define ID_LightGreen 		1
 #define ID_LightRed			2
-#define ID_Wireless_Com	3
+#define ID_Wireless_Com		3
 #define ID_Wheel_Left		4
-#define ID_Wheel_Right	5
+#define ID_Wheel_Right		5
 
 //定义灯状态
 #define Status_Light_OFF	0
@@ -24,17 +24,19 @@ extern u8 CH[RX_PLOAD_WIDTH];
 //定义车轮方向
 #define Direction_Stop			0
 #define Direction_Forward		1
-#define Direction_Backward	2
+#define Direction_Backward		2
 
 //类声明
 struct TLight;
 struct TWireless_Com;
 struct TWheel;
+struct TTimer;
 
 // 定义函数指针
 typedef void (*tvf_light)(pobject(TLight,obj));
 typedef void (*tvf_wheel)(pobject(TWheel,obj));
 typedef u8 (*tu8f_wireless_com)(pobject(TWireless_Com,obj));
+typedef u8 (*tu8f_timer)(pobject(TTimer,obj),u32 set_value);
 typedef void (*tvfv)(void);
 typedef u8 (*tu8fv)(void);
 
@@ -84,6 +86,19 @@ struct TCar
 		tu8fv ID;					// 类的类型标识
 	Variable
 		
+};
+
+//定时器类
+struct TTimer
+{
+	Const
+		tu8fv ID;					// 类的类型标识
+	Variable
+		_Bool *BaseFlag;			//时基变量指针
+		u32 Set;					//延时设置值
+		u32 Counter;				//延时计数
+	Method
+		tu8f_timer DELAY;			//延时函数
 };
 
 

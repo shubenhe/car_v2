@@ -184,7 +184,7 @@ void wheel_Run(pobject(TWheel,obj))
 		TIM_SetCompare2(TIM8,(obj->Speed)*600u);
 		
 		if(obj->Direction == Direction_Stop)
-		{	
+		{
 			PCout(6) = 0;
 			PBout(0) = 0;
 		}
@@ -294,27 +294,38 @@ void com_to_wheel(pobject(TWireless_Com,obj_Wl),pobject(TWheel,obj_L),pobject(TW
 		}
 	}
 	else
-	{//原地
+	{// 原地
 		if(obj_Wl->Channel[1]>135)
-		{//左转
+		{// 左转
 			obj_L->Direction = Direction_Stop;
 			obj_R->Direction = Direction_Forward;
 			s_r_temp = (obj_Wl->Channel[1]-135u)*s_r_temp/(250-135);
 			s_l_temp = 0;
 		}
 		else if(obj_Wl->Channel[1]<115)
-		{//右转
+		{// 右转
 			obj_L->Direction = Direction_Forward;
 			obj_R->Direction = Direction_Stop;
 			s_l_temp = (115u-obj_Wl->Channel[1])*s_l_temp/115;
 			s_r_temp = 0;
 		}
 		else
-		{//停
+		{// 停
 			obj_L->Direction =  obj_R->Direction = Direction_Stop;
 			s_l_temp = s_r_temp = 0;
 		}
 	}
 	obj_L->Speed = s_l_temp;
 	obj_R->Speed = s_r_temp;
+}
+
+// 功能：计时器延时函数
+// 参数：	obj，TTimer类型，对类成员本身的引用
+//			set_value，u32类型，设置值
+// 返回：	0，延时未到
+//			1，延时到
+// 备注：
+u8 timer_counter(pobject(TTimer,obj),u32 set_value)
+{
+	return 0;
 }
