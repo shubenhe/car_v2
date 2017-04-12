@@ -12,19 +12,20 @@ extern _Bool TIMER1_1ms_flag;
 
 //定义身份ID
 #define ID_LightGreen 		1
-#define ID_LightRed			2
+#define ID_LightRed				2
 #define ID_Wireless_Com		3
-#define ID_Wheel_Left		4
+#define ID_Wheel_Left			4
 #define ID_Wheel_Right		5
-#define ID_Timer				6
+#define ID_Timer					6
+#define ID_NakedSystem		7
 
 //定义灯状态
 #define Status_Light_OFF	0
 #define Status_Light_ON		1
 
 //定义车轮方向
-#define Direction_Stop			0
-#define Direction_Forward		1
+#define Direction_Stop				0
+#define Direction_Forward			1
 #define Direction_Backward		2
 
 //类声明
@@ -32,10 +33,12 @@ struct TLight;
 struct TWireless_Com;
 struct TWheel;
 struct TTimer;
+struct TNakedSystem;
 
 // 定义函数指针
 typedef void (*tvf_light)(pobject(TLight,obj));
 typedef void (*tvf_wheel)(pobject(TWheel,obj));
+typedef void (*tvf_nakedsystem)(pobject(TNakedSystem,obj_S),pobject(TTimer,obj_T));
 typedef u8 (*tu8f_wireless_com)(pobject(TWireless_Com,obj));
 typedef u8 (*tu8f_timer)(pobject(TTimer,obj),u32 set_value);
 typedef void (*tvfv)(void);
@@ -100,6 +103,23 @@ struct TTimer
 		u32 Counter;				//延时计数
 	Method
 		tu8f_timer DELAY;			//延时函数
+};
+
+//裸系统类
+struct TNakedSystem
+{
+	Const
+		tu8fv ID;		// 类的类型标识
+	Variable
+		_Bool *Statistics_Switch;		//统计开关指针
+		u32 *LoopTime_Counter;		//主循环时间计数器指针
+		u32 Loop_Times_Counter;	//循环次数统计计数器
+		u32 LoopTime_MAX;		//主循环最大时间，单位us
+		u32 LoopTime_MIN;		//主循环最小时间，单位us
+		u32 LoopTime_MEAN_1S;		//1秒内主循环平均时间，单位us
+	Method
+		tvfv Timer_INIT;		//统计函数
+		tvf_nakedsystem Statistics_RUN;		//统计函数
 };
 
 

@@ -350,7 +350,7 @@ u8 timer_delay(pobject(TTimer,obj),u32 set_value)
 	
 		if(base_flag)
 		{// 延时时基到
-			if(obj->Counter <= obj->Set)
+			if(obj->Counter < obj->Set)
 			{// 延时未到
 				obj->Counter++;
 			}
@@ -385,7 +385,97 @@ void timer_Create(pobject(TTimer,obj))
 	obj->DELAY = timer_delay;
 }
 
+// 功能：系统使用率统计
+// 参数：	obj_S，TNakedSystem类指针
+//				obj_T，TTimer类指针
+// 返回：无
+// 备注：
+void nakedsystem_Statistics(pobject(TNakedSystem,obj_S),pobject(TTimer,obj_T))
+{
+	u32 one_time = 0;
+	
+	if(*obj_S->Statistics_Switch)
+	{//统计已开始
+		one_time = *obj_S->LoopTime_Counter;
+		*obj_S->LoopTime_Counter = 0;
+		
+		obj_S->Loop_Times_Counter++;
+		
+		if(obj_T->DELAY(obj_T,1000))
+		{//延时1秒执行平均统计
+			obj_S->LoopTime_MEAN_1S = 1000000u/obj_S->Loop_Times_Counter;//更新平均值
+			obj_S->Loop_Times_Counter = 0;		//复位开始下一次统计
+		}
+		
+		if(one_time > obj_S->LoopTime_MAX)
+		{//更新最大值
+			obj_S->LoopTime_MAX = one_time;
+		}
+		if(one_time < obj_S->LoopTime_MIN)
+		{//更新最小值
+			obj_S->LoopTime_MIN = one_time;
+		}
+	}
+	else
+	{//统计未开始
+		obj_S->Loop_Times_Counter = 0;
+		*obj_S->LoopTime_Counter = 0;
+		obj_S->LoopTime_MAX = 0;
+		obj_S->LoopTime_MIN = 10000000;//10秒
+		obj_S->LoopTime_MEAN_1S = 0;
+		*obj_S->Statistics_Switch = 1;
+	}
+}
+
+// 功能：返回系统类ID
+// 参数：无
+// 返回：系统类ID
+// 备注：
+u8 nakedsystem_ID(void)
+{
+	return ID_NakedSystem;
+}
+
+// 功能：系统统计定时器初始化
+// 参数：
+// 返回：无
+// 备注：
+void nakedsystem_timer_init(void)
+{
+  TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE); //时钟使能
+
+	TIM_TimeBaseStructure.TIM_Period = 0xffff; //设置在下一个更新事件装入活动的自动重装载寄存器周期的值	 计数到65536为65.536ms
+	TIM_TimeBaseStructure.TIM_Prescaler =71; //设置用来作为TIMx时钟频率除数的预分频值  2Mhz的计数频率  
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0; //设置时钟分割:TDTS = Tck_tim
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  //TIM向上计数模式
+	TIM_TimeBaseInit(TIM6, &TIM_TimeBaseStructure); //根据TIM_TimeBaseInitStruct中指定的参数初始化TIMx的时间基数单位
+ 
+//	TIM_Cmd(TIM6, ENABLE);  //使能TIMx外设
+}
+
+// 功能：系统类创建
+// 参数：	obj，TNakedSystem类指针
+// 返回：无
+// 备注：
+void nakedsystem_Create(pobject(TNakedSystem,obj))
+{
+	// 常量初始化
+	obj->ID = nakedsystem_ID;
+	// 变量初始化
+	obj->LoopTime_MAX = 0;
+	obj->LoopTime_MEAN_1S = 0;
+	obj->LoopTime_MIN = 1000000;
+	obj->Loop_Times_Counter = 0;
+	//	行为初始化
+	obj->Statistics_RUN = nakedsystem_Statistics;
+	obj->Timer_INIT = nakedsystem_timer_init;
+}
+
+u32 TIME_FLAG_COUNTER = 0;		//时基标识计数器
 _Bool TIMER1_1ms_flag;	// 时基标识
+_Bool TIMER_SYS_1us_flag;
 
 // 功能：计时器标识置位
 // 参数：无
