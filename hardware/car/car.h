@@ -7,8 +7,11 @@
 #include "24l01.h"
 #include "pwm.h"
 #include "direction.h"
+#include "usart.h"
+#include "main.h"
 
 extern _Bool TIMER1_1ms_flag;
+extern _Bool TIMER_SYS_1ms_flag;
 
 //定义身份ID
 #define ID_LightGreen 		1
@@ -111,8 +114,7 @@ struct TNakedSystem
 	Const
 		tu8fv ID;		// 类的类型标识
 	Variable
-		_Bool *Statistics_Switch;		//统计开关指针
-		u32 *LoopTime_Counter;		//主循环时间计数器指针
+		_Bool Statistics_Switch;		//统计开关指针
 		u32 Loop_Times_Counter;	//循环次数统计计数器
 		u32 LoopTime_MAX;		//主循环最大时间，单位us
 		u32 LoopTime_MIN;		//主循环最小时间，单位us
@@ -135,5 +137,6 @@ void light_red_INIT(void);
 void com_to_wheel(pobject(TWireless_Com,obj_Wl),pobject(TWheel,obj_l),pobject(TWheel,obj_r));
 void timer_init(void);
 void timer_Create(pobject(TTimer,obj));
+void nakedsystem_Create(pobject(TNakedSystem,obj));
 
 #endif

@@ -39,6 +39,10 @@ int main(void)
 	object(TWheel,Wheel_Right);
 	//定时器1
 	object(TTimer,TIMER1);
+	//定时器_系统管理
+	object(TTimer,TIMER_SYS);
+	//系统管理
+	object(TNakedSystem,MySystem);
 	
 	//创建对象——绿灯
 	create(light_Create,&Light_Green);
@@ -59,15 +63,23 @@ int main(void)
 	//定时器1
 	create(timer_Create,&TIMER1);
 	TIMER1.BaseFlag = &TIMER1_1ms_flag;
+	//定时器_系统管理
+	create(timer_Create,&TIMER_SYS);
+	TIMER_SYS.BaseFlag = &TIMER_SYS_1ms_flag;
+	//系统管理
+	create(nakedsystem_Create,&MySystem);
 	
 	//初始化
 	delay_init();
 	NVIC_Configuration();
-//	uart_init(9600);
+#if UART_SWITCH
+	uart_init(115200);
+#endif
 	Wheel_Left.INIT();
 	Light_Red.INIT();	//初始化与LED连接的硬件接口
 	Light_Green.INIT();
 	Wireless_Com.INIT();	//初始化NRF24L01
+	MySystem.Timer_INIT();
 	timer_init();
 	 
 	while(NRF24L01_Check())	//检查NRF24L01是否在位.	
@@ -77,10 +89,11 @@ int main(void)
 	
 	while(!(TIMER1.DELAY(&TIMER1,1000)));
 	
-	NRF24L01_RX_Mode();		
-	 
+	NRF24L01_RX_Mode();
+	
 	while(1)
 	{
+		MySystem.Statistics_RUN(&MySystem,&TIMER_SYS);
 		
 		if(Wireless_Com.Get_Message(&Wireless_Com) ==0)
 		{	//一旦接收到信息
