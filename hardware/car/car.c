@@ -336,10 +336,6 @@ u8 timer_ID(void)
 // 备注：
 u8 timer_delay(pobject(TTimer,obj),u32 set_value)
 {
-	_Bool base_flag = *obj->BaseFlag;//更新时基标记
-	
-	*obj->BaseFlag = 0;//复位时基标识
-	
 	if(set_value)
 	{	//需延时
 		if(0 == obj->Set)
@@ -348,7 +344,7 @@ u8 timer_delay(pobject(TTimer,obj),u32 set_value)
 			obj->Counter = 0;
 		}
 	
-		if(base_flag)
+		if(*obj->BaseFlag)
 		{// 延时时基到
 			if(obj->Counter < obj->Set)
 			{// 延时未到
@@ -385,15 +381,20 @@ void timer_Create(pobject(TTimer,obj))
 	obj->DELAY = timer_delay;
 }
 
-// 功能：系统使用率统计
+// 功能：系统开始处理函数，更新时间标记，统计系统使用率
 // 参数：	obj_S，TNakedSystem类指针
 //				obj_T，TTimer类指针
 // 返回：无
 // 备注：
-void nakedsystem_Statistics(pobject(TNakedSystem,obj_S),pobject(TTimer,obj_T))
+void nakedsystem_begin(pobject(TNakedSystem,obj_S),pobject(TTimer,obj_T))
 {
 	u32 one_time = 0;
 	
+	//更新时间标记
+	obj_S->T_1ms_flag = obj_S->T_1ms_flag_M;
+	obj_S->T_1ms_flag_M = 0;
+	
+	//统计
 	if(obj_S->Statistics_Switch)
 	{//统计已开始
 		one_time = TIM_GetCounter(TIM6);
@@ -430,6 +431,15 @@ void nakedsystem_Statistics(pobject(TNakedSystem,obj_S),pobject(TTimer,obj_T))
 		TIM_SetCounter(TIM6,0);
 		TIM_Cmd(TIM6, ENABLE);
 	}
+}
+
+// 功能：系统循环结束处理函数，复位时间标记
+// 参数：	obj，TNakedSystem类指针
+// 返回：无
+// 备注：
+void nakedsystem_end(pobject(TNakedSystem,obj))
+{
+	obj->T_1ms_flag = 0;
 }
 
 // 功能：返回系统类ID
@@ -469,7 +479,51 @@ void nakedsystem_timer_init(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQ通道被使能
 	NVIC_Init(&NVIC_InitStructure);  //根据NVIC_InitStruct中指定的参数初始化外设NVIC寄存器
 	
-	TIM_Cmd(TIM6, DISABLE);  //使能TIMx外设
+	TIM_Cmd(TIM6, DISABLE);  //使能TIMx外设RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE); //时钟使能
+
+	TIM_TimeBaseStructure.TIM_Period = 9; //设置在下一个更新事件装入活动的自动重装载寄存器周期的值	 计数到10为1ms
+	TIM_TimeBaseStructure.TIM_Prescaler =7199; //设置用来作为TIMx时钟频率除数的预分频值  10Khz的计数频率  
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0; //设置时钟分割:TDTS = Tck_tim
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  //TIM向上计数模式
+	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure); //根据TIM_TimeBaseInitStruct中指定的参数初始化TIMx的时间基数单位
+ 
+	TIM_ITConfig(  //使能或者失能指定的TIM中断
+		TIM4, //TIM4
+		TIM_IT_Update ,
+		ENABLE  //使能
+		);
+	NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;  //TIM4中断
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;  //先占优先级0级
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;  //从优先级3级
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQ通道被使能
+	NVIC_Init(&NVIC_InitStructure);  //根据NVIC_InitStruct中指定的参数初始化外设NVIC寄存器
+
+	TIM_Cmd(TIM4, ENABLE);  //使能TIMx外设
+}
+
+// 功能：计时器标识置位
+// 参数：无
+// 返回：无
+// 备注：
+void sys_timer_flag_set(pobject(TNakedSystem,obj))
+{
+	obj->T_1ms_flag_M = 1;
+}
+
+// 功能：TIM4定时器中断
+// 参数：
+// 返回：无
+// 备注：
+extern struct TNakedSystem MySystem;
+
+void TIM4_IRQHandler(void)   //TIM4中断
+{
+	if(TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET) //检查指定的TIM中断发生与否:TIM 中断源 
+		{
+			sys_timer_flag_set(&MySystem);
+			
+			TIM_ClearITPendingBit(TIM4, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
+		}
 }
 
 // 功能：TIM6定时器中断
@@ -501,65 +555,10 @@ void nakedsystem_Create(pobject(TNakedSystem,obj))
 	obj->LoopTime_MEAN_1S = 0;
 	obj->LoopTime_MIN = 10000000;
 	obj->Loop_Times_Counter = 0;
+	obj->T_1ms_flag = 0;
+	obj->T_1ms_flag_M = 0;
 	//	行为初始化
 	obj->Timer_INIT = nakedsystem_timer_init;
-	obj->Statistics_RUN = nakedsystem_Statistics;
-}
-
-_Bool TIMER1_1ms_flag;	// 时基标识
-_Bool TIMER_SYS_1ms_flag;
-
-// 功能：计时器标识置位
-// 参数：无
-// 返回：无
-// 备注：
-void timer_flag_set(void)
-{
-	TIMER1_1ms_flag = 1;
-	TIMER_SYS_1ms_flag = 1;
-}
-
-// 功能：定时器初始化
-// 参数：
-// 返回：无
-// 备注：
-void timer_init(void)
-{
-  TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
-
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE); //时钟使能
-
-	TIM_TimeBaseStructure.TIM_Period = 9; //设置在下一个更新事件装入活动的自动重装载寄存器周期的值	 计数到10为1ms
-	TIM_TimeBaseStructure.TIM_Prescaler =7199; //设置用来作为TIMx时钟频率除数的预分频值  10Khz的计数频率  
-	TIM_TimeBaseStructure.TIM_ClockDivision = 0; //设置时钟分割:TDTS = Tck_tim
-	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  //TIM向上计数模式
-	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure); //根据TIM_TimeBaseInitStruct中指定的参数初始化TIMx的时间基数单位
- 
-	TIM_ITConfig(  //使能或者失能指定的TIM中断
-		TIM4, //TIM4
-		TIM_IT_Update ,
-		ENABLE  //使能
-		);
-	NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;  //TIM4中断
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;  //先占优先级0级
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;  //从优先级3级
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQ通道被使能
-	NVIC_Init(&NVIC_InitStructure);  //根据NVIC_InitStruct中指定的参数初始化外设NVIC寄存器
-
-	TIM_Cmd(TIM4, ENABLE);  //使能TIMx外设
-}
-
-// 功能：TIM4定时器中断
-// 参数：
-// 返回：无
-// 备注：
-void TIM4_IRQHandler(void)   //TIM4中断
-{
-	if(TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET) //检查指定的TIM中断发生与否:TIM 中断源 
-		{
-			timer_flag_set();
-			
-			TIM_ClearITPendingBit(TIM4, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
-		}
+	obj->BEGIN = nakedsystem_begin;
+	obj->END = nakedsystem_end;
 }

@@ -10,9 +10,6 @@
 #include "usart.h"
 #include "main.h"
 
-extern _Bool TIMER1_1ms_flag;
-extern _Bool TIMER_SYS_1ms_flag;
-
 //定义身份ID
 #define ID_LightGreen 		1
 #define ID_LightRed				2
@@ -41,7 +38,8 @@ struct TNakedSystem;
 // 定义函数指针
 typedef void (*tvf_light)(pobject(TLight,obj));
 typedef void (*tvf_wheel)(pobject(TWheel,obj));
-typedef void (*tvf_nakedsystem)(pobject(TNakedSystem,obj_S),pobject(TTimer,obj_T));
+typedef void (*tvf_nakedsystem)(pobject(TNakedSystem,obj_S));
+typedef void (*tvf_nakedsystem_t)(pobject(TNakedSystem,obj_S),pobject(TTimer,obj_T));
 typedef u8 (*tu8f_wireless_com)(pobject(TWireless_Com,obj));
 typedef u8 (*tu8f_timer)(pobject(TTimer,obj),u32 set_value);
 typedef void (*tvfv)(void);
@@ -119,9 +117,12 @@ struct TNakedSystem
 		u32 LoopTime_MAX;		//主循环最大时间，单位us
 		u32 LoopTime_MIN;		//主循环最小时间，单位us
 		u32 LoopTime_MEAN_1S;		//1秒内主循环平均时间，单位us
+		_Bool T_1ms_flag;		//1ms时间标记
+		_Bool T_1ms_flag_M;		//1ms时间标记影子
 	Method
 		tvfv Timer_INIT;		//统计函数
-		tvf_nakedsystem Statistics_RUN;		//统计函数
+		tvf_nakedsystem_t BEGIN;		//统计函数
+		tvf_nakedsystem END;
 };
 
 

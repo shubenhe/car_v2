@@ -23,6 +23,8 @@
 extern	u8 hopping[5];
 extern	u8 hopping_turn;
 
+//申请对象空间——系统管理
+object(TNakedSystem,MySystem);
 
 int main(void)
 {
@@ -41,10 +43,10 @@ int main(void)
 	object(TTimer,TIMER1);
 	//定时器_系统管理
 	object(TTimer,TIMER_SYS);
-	//系统管理
-	object(TNakedSystem,MySystem);
 	
-	//创建对象——绿灯
+	//创建对象——系统管理
+	create(nakedsystem_Create,&MySystem);
+	//绿灯
 	create(light_Create,&Light_Green);
 	Light_Green.ID = light_green_ID;
 	Light_Green.INIT = light_green_INIT;
@@ -62,12 +64,10 @@ int main(void)
 	Wheel_Right.ID = wheel_right_ID;
 	//定时器1
 	create(timer_Create,&TIMER1);
-	TIMER1.BaseFlag = &TIMER1_1ms_flag;
+	TIMER1.BaseFlag = &(MySystem.T_1ms_flag);
 	//定时器_系统管理
 	create(timer_Create,&TIMER_SYS);
-	TIMER_SYS.BaseFlag = &TIMER_SYS_1ms_flag;
-	//系统管理
-	create(nakedsystem_Create,&MySystem);
+	TIMER_SYS.BaseFlag = &(MySystem.T_1ms_flag);
 	
 	//初始化
 	delay_init();
@@ -80,7 +80,6 @@ int main(void)
 	Light_Green.INIT();
 	Wireless_Com.INIT();	//初始化NRF24L01
 	MySystem.Timer_INIT();
-	timer_init();
 	 
 	while(NRF24L01_Check())	//检查NRF24L01是否在位.	
 	{
@@ -93,7 +92,7 @@ int main(void)
 	
 	while(1)
 	{
-		MySystem.Statistics_RUN(&MySystem,&TIMER_SYS);
+		MySystem.BEGIN(&MySystem,&TIMER_SYS);
 		
 		if(Wireless_Com.Get_Message(&Wireless_Com) ==0)
 		{	//一旦接收到信息
@@ -115,6 +114,7 @@ int main(void)
 				Light_Green.OFF(&Light_Green);
 		}
 		
+		MySystem.END(&MySystem);
 	 }
 }
 
