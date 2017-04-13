@@ -70,7 +70,7 @@ int main(void)
 	TIMER_SYS.BaseFlag = &(MySystem.T_1ms_flag);
 	
 	//初始化
-	delay_init();
+//	delay_init();
 	NVIC_Configuration();
 #if UART_SWITCH
 	uart_init(115200);
@@ -92,7 +92,7 @@ int main(void)
 	
 	while(1)
 	{
-		MySystem.BEGIN(&MySystem,&TIMER_SYS);
+		MySystem.RUN(&MySystem,&TIMER_SYS);
 		
 		if(Wireless_Com.Get_Message(&Wireless_Com) ==0)
 		{	//一旦接收到信息
@@ -114,7 +114,6 @@ int main(void)
 				Light_Green.OFF(&Light_Green);
 		}
 		
-		MySystem.END(&MySystem);
 	 }
 }
 

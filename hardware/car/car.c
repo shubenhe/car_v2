@@ -381,12 +381,21 @@ void timer_Create(pobject(TTimer,obj))
 	obj->DELAY = timer_delay;
 }
 
-// 功能：系统开始处理函数，更新时间标记，统计系统使用率
+// 功能：返回系统类ID
+// 参数：无
+// 返回：系统类ID
+// 备注：
+u8 nakedsystem_ID(void)
+{
+	return ID_NakedSystem;
+}
+
+// 功能：主循环中系统处理函数，更新时间标记，统计系统使用率
 // 参数：	obj_S，TNakedSystem类指针
 //				obj_T，TTimer类指针
 // 返回：无
 // 备注：
-void nakedsystem_begin(pobject(TNakedSystem,obj_S),pobject(TTimer,obj_T))
+void nakedsystem_run(pobject(TNakedSystem,obj_S),pobject(TTimer,obj_T))
 {
 	u32 one_time = 0;
 	
@@ -433,23 +442,15 @@ void nakedsystem_begin(pobject(TNakedSystem,obj_S),pobject(TTimer,obj_T))
 	}
 }
 
-// 功能：系统循环结束处理函数，复位时间标记
+// 功能：置位时间标记
 // 参数：	obj，TNakedSystem类指针
 // 返回：无
 // 备注：
-void nakedsystem_end(pobject(TNakedSystem,obj))
+void nakedsystem_set_t_flag(pobject(TNakedSystem,obj))
 {
-	obj->T_1ms_flag = 0;
+	obj->T_1ms_flag_M = 1;
 }
 
-// 功能：返回系统类ID
-// 参数：无
-// 返回：系统类ID
-// 备注：
-u8 nakedsystem_ID(void)
-{
-	return ID_NakedSystem;
-}
 #define SYS_LOOP_TIME_STATS_MAX 65000
 // 功能：系统统计定时器初始化
 // 参数：
@@ -501,15 +502,6 @@ void nakedsystem_timer_init(void)
 	TIM_Cmd(TIM4, ENABLE);  //使能TIMx外设
 }
 
-// 功能：计时器标识置位
-// 参数：无
-// 返回：无
-// 备注：
-void sys_timer_flag_set(pobject(TNakedSystem,obj))
-{
-	obj->T_1ms_flag_M = 1;
-}
-
 // 功能：TIM4定时器中断
 // 参数：
 // 返回：无
@@ -520,7 +512,7 @@ void TIM4_IRQHandler(void)   //TIM4中断
 {
 	if(TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET) //检查指定的TIM中断发生与否:TIM 中断源 
 		{
-			sys_timer_flag_set(&MySystem);
+			MySystem.SET_T_Flag(&MySystem);
 			
 			TIM_ClearITPendingBit(TIM4, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
 		}
@@ -537,7 +529,7 @@ void TIM6_IRQHandler(void)   //TIM4中断
 			TIM_Cmd(TIM6, DISABLE);  //使能TIMx外设
 			TIM_SetCounter(TIM6,SYS_LOOP_TIME_STATS_MAX);
 			
-			TIM_ClearITPendingBit(TIM6, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
+			TIM_ClearITPendingBit(TIM6, TIM_IT_Update);  //清除TIMx的中断待处理位:TIM 中断源 
 		}
 }
 
@@ -559,6 +551,6 @@ void nakedsystem_Create(pobject(TNakedSystem,obj))
 	obj->T_1ms_flag_M = 0;
 	//	行为初始化
 	obj->Timer_INIT = nakedsystem_timer_init;
-	obj->BEGIN = nakedsystem_begin;
-	obj->END = nakedsystem_end;
+	obj->RUN = nakedsystem_run;
+	obj->SET_T_Flag = nakedsystem_set_t_flag;
 }

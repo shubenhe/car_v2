@@ -116,13 +116,13 @@ struct TNakedSystem
 		u32 Loop_Times_Counter;	//循环次数统计计数器
 		u32 LoopTime_MAX;		//主循环最大时间，单位us
 		u32 LoopTime_MIN;		//主循环最小时间，单位us
-		u32 LoopTime_MEAN_1S;		//1秒内主循环平均时间，单位us
+		u32 LoopTime_MEAN_1S;		//1秒内主循环平均时间，单位us,系统运行约定最大耗时为1ms,则可表示程序占用系统资源的千分比例
 		_Bool T_1ms_flag;		//1ms时间标记
 		_Bool T_1ms_flag_M;		//1ms时间标记影子
 	Method
-		tvfv Timer_INIT;		//统计函数
-		tvf_nakedsystem_t BEGIN;		//统计函数
-		tvf_nakedsystem END;
+		tvfv Timer_INIT;		//定时器初始化函数
+		tvf_nakedsystem_t RUN;		//主循环中功能运行函数
+		tvf_nakedsystem SET_T_Flag;		//置位时间标识函数
 };
 
 
@@ -136,7 +136,6 @@ u8 wheel_right_ID(void);
 void light_green_INIT(void);
 void light_red_INIT(void);
 void com_to_wheel(pobject(TWireless_Com,obj_Wl),pobject(TWheel,obj_l),pobject(TWheel,obj_r));
-void timer_init(void);
 void timer_Create(pobject(TTimer,obj));
 void nakedsystem_Create(pobject(TNakedSystem,obj));
 
