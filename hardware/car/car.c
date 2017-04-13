@@ -334,25 +334,37 @@ u8 timer_ID(void)
 // 返回：	0，延时未到
 //			1，延时到
 // 备注：
-u8 timer_delay(pobject(TTimer,obj),u32 set_value)
+u8 timer_delay(pobject(TTimer,obj_T),pobject(TNakedSystem,obj_S),u32 set_value)
 {
+	_Bool T_flag = 0;
+	
+	if(0 == obj_S->Statistics_Switch)
+	{	//未进入主循环，复位时间标识
+		T_flag = obj_S->T_1ms_flag_M;
+		obj_S->T_1ms_flag_M = 0;
+	}
+	else
+	{
+		T_flag = *obj_T->BaseFlag;
+	}
+	
 	if(set_value)
 	{	//需延时
-		if(0 == obj->Set)
+		if(0 == obj_T->Set)
 		{	// 未设置延时时间
-			obj->Set = set_value;
-			obj->Counter = 0;
+			obj_T->Set = set_value;
+			obj_T->Counter = 0;
 		}
 	
-		if(*obj->BaseFlag)
+		if(T_flag)
 		{// 延时时基到
-			if(obj->Counter < obj->Set)
+			if(obj_T->Counter < obj_T->Set)
 			{// 延时未到
-				obj->Counter++;
+				obj_T->Counter++;
 			}
 			else
 			{// 延时到
-				obj->Set = obj->Counter = 0;	//	计时器复位
+				obj_T->Set = obj_T->Counter = 0;	//	计时器复位
 				
 				return 1;
 			}
@@ -412,7 +424,7 @@ void nakedsystem_run(pobject(TNakedSystem,obj_S),pobject(TTimer,obj_T))
 		
 		obj_S->Loop_Times_Counter++;
 		
-		if(obj_T->DELAY(obj_T,1000))
+		if(obj_T->DELAY(obj_T,obj_S,1000))
 		{//延时1秒执行平均统计
 			obj_S->LoopTime_MEAN_1S = 1000000u/obj_S->Loop_Times_Counter;//更新平均值
 			obj_S->Loop_Times_Counter = 0;		//复位开始下一次统计
@@ -461,7 +473,7 @@ void nakedsystem_timer_init(void)
   TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE); //时钟使能
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4|RCC_APB1Periph_TIM6, ENABLE); //时钟使能
 
 	TIM_TimeBaseStructure.TIM_Period = SYS_LOOP_TIME_STATS_MAX; //设置在下一个更新事件装入活动的自动重装载寄存器周期的值	 计数到65536为65.536ms
 	TIM_TimeBaseStructure.TIM_Prescaler =71; //设置用来作为TIMx时钟频率除数的预分频值  2Mhz的计数频率  
@@ -506,15 +518,16 @@ void nakedsystem_timer_init(void)
 // 参数：
 // 返回：无
 // 备注：
-extern struct TNakedSystem MySystem;
 
+//声明系统类
+extern struct TNakedSystem MySystem;
 void TIM4_IRQHandler(void)   //TIM4中断
 {
 	if(TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET) //检查指定的TIM中断发生与否:TIM 中断源 
 		{
 			MySystem.SET_T_Flag(&MySystem);
 			
-			TIM_ClearITPendingBit(TIM4, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
+			TIM_ClearITPendingBit(TIM4, TIM_IT_Update);  //清除TIMx的中断待处理位:TIM 中断源 
 		}
 }
 

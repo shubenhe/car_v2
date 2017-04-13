@@ -28,6 +28,7 @@
 #define Direction_Forward			1
 #define Direction_Backward		2
 
+
 //类声明
 struct TLight;
 struct TWireless_Com;
@@ -41,7 +42,7 @@ typedef void (*tvf_wheel)(pobject(TWheel,obj));
 typedef void (*tvf_nakedsystem)(pobject(TNakedSystem,obj_S));
 typedef void (*tvf_nakedsystem_t)(pobject(TNakedSystem,obj_S),pobject(TTimer,obj_T));
 typedef u8 (*tu8f_wireless_com)(pobject(TWireless_Com,obj));
-typedef u8 (*tu8f_timer)(pobject(TTimer,obj),u32 set_value);
+typedef u8 (*tu8f_timer_s)(pobject(TTimer,obj),pobject(TNakedSystem,obj_S),u32 set_value);
 typedef void (*tvfv)(void);
 typedef u8 (*tu8fv)(void);
 
@@ -103,7 +104,7 @@ struct TTimer
 		u32 Set;					//延时设置值
 		u32 Counter;				//延时计数
 	Method
-		tu8f_timer DELAY;			//延时函数
+		tu8f_timer_s DELAY;			//延时函数
 };
 
 //裸系统类

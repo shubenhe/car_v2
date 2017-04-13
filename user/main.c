@@ -70,7 +70,7 @@ int main(void)
 	TIMER_SYS.BaseFlag = &(MySystem.T_1ms_flag);
 	
 	//初始化
-//	delay_init();
+	delay_init();
 	NVIC_Configuration();
 #if UART_SWITCH
 	uart_init(115200);
@@ -81,12 +81,12 @@ int main(void)
 	Wireless_Com.INIT();	//初始化NRF24L01
 	MySystem.Timer_INIT();
 	 
-	while(NRF24L01_Check())	//检查NRF24L01是否在位.	
+	while(NRF24L01_Check())	//检查NRF24L01是否在位.
 	{
 		while(1);
 	}
 	
-	while(!(TIMER1.DELAY(&TIMER1,1000)));
+	while(!(TIMER1.DELAY(&TIMER_SYS,&MySystem,1000)));
 	
 	NRF24L01_RX_Mode();
 	
@@ -106,7 +106,7 @@ int main(void)
 			Light_Red.OFF(&Light_Red);	//红灯灭
 		}
 		
-		if(TIMER1.DELAY(&TIMER1,100))
+		if(TIMER1.DELAY(&TIMER1,&MySystem,100))
 		{
 			if(Status_Light_OFF == Light_Green.Status)
 				Light_Green.ON(&Light_Green);
