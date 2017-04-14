@@ -12,6 +12,7 @@
 #include "main.h"
 #include "ycjobject.h"
 #include "car.h"
+#include "mysystem.h"
 
 #define speed_min 2000
 #define speed_max 12000
